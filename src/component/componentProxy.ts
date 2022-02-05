@@ -16,6 +16,7 @@ import {
   ComputedOptions,
   MethodOptions,
   ExtractComputedReturns,
+  MixinOptions,
 } from './componentOptions'
 import {
   ComponentInternalInstance,
@@ -25,6 +26,8 @@ import {
   ObjectEmitsOptions,
   Slots,
 } from '../runtimeContext'
+import { UnionToIntersection } from '../utils'
+import { Accessors } from 'vue/types/options'
 
 type EmitsToProps<T extends EmitsOptions> = T extends string[]
   ? {
@@ -45,7 +48,30 @@ type EmitsToProps<T extends EmitsOptions> = T extends string[]
     }
   : {}
 
-export type ComponentInstance = InstanceType<VueConstructor>
+type UnAccessors<T extends Accessors<ComputedOptions>> = T extends Accessors<
+  infer P
+>
+  ? ExtractComputedReturns<P>
+  : never
+
+type ExtractMixinData<M extends MixinOptions> = UnionToIntersection<
+  NonNullable<M[number]['data']>
+>
+type ExtractMixinComputed<M extends MixinOptions> = UnionToIntersection<
+  UnAccessors<NonNullable<M[number]['computed']>>
+>
+type ExtractMixinMethods<M extends MixinOptions> = UnionToIntersection<
+  NonNullable<M[number]['methods']>
+>
+type ExtractMixinProps<M extends MixinOptions> = UnionToIntersection<
+  ExtractPropTypes<NonNullable<M[number]['props']>>
+>
+
+export type CreateVueThisContext<M extends MixinOptions> =
+  ExtractMixinProps<M> &
+    ExtractMixinData<M> &
+    ExtractMixinComputed<M> &
+    ExtractMixinMethods<M>
 
 // public properties exposed on the proxy, which is used as the render context
 // in templates (as `this` in the render option)
@@ -55,7 +81,7 @@ export type ComponentRenderProxy<
   D = {}, // return from data()
   C extends ComputedOptions = {},
   M extends MethodOptions = {},
-  Mixin = {},
+  Mixin extends MixinOptions = [],
   Extends = {},
   Emits extends EmitsOptions = {},
   PublicProps = P,
@@ -91,7 +117,8 @@ export type ComponentRenderProxy<
   D &
   M &
   ExtractComputedReturns<C> &
-  Omit<Vue, '$data' | '$props' | '$attrs' | '$emit'>
+  Omit<Vue, '$data' | '$props' | '$attrs' | '$emit'> &
+  CreateVueThisContext<Mixin>
 
 // for Vetur and TSX support
 type VueConstructorProxy<
@@ -100,7 +127,7 @@ type VueConstructorProxy<
   Data,
   Computed extends ComputedOptions,
   Methods extends MethodOptions,
-  Mixin = {},
+  Mixin extends MixinOptions = [],
   Extends = {},
   Emits extends EmitsOptions = {},
   Props = ExtractPropTypes<PropsOptions> &
@@ -131,7 +158,7 @@ export type VueProxy<
   Data = DefaultData<Vue>,
   Computed extends ComputedOptions = DefaultComputed,
   Methods extends MethodOptions = DefaultMethods<Vue>,
-  Mixin = {},
+  Mixin extends MixinOptions = [],
   Extends = {},
   Emits extends EmitsOptions = {}
 > = Vue2ComponentOptions<

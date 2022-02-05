@@ -52,3 +52,54 @@ describe('emits', () => {
   //  @ts-expect-error
   expectError(foo.value.$emit('blah'))
 })
+
+describe('mixins', () => {
+  const testMixin1 = defineComponent({
+    props: {
+      dog: { type: String, default: undefined },
+    },
+    data() {
+      return {
+        /** Foo */
+        cat: 'Boris' as const,
+      }
+    },
+    methods: {
+      makePizza() {
+        return 'Pizza' as const
+      },
+      // dog() { return 'Dog' as const }
+    },
+  })
+  const testMixin2 = defineComponent({
+    props: {
+      mixin2prop: { type: Boolean, value: true },
+    },
+    data() {
+      return { fish: 'Fish' as const }
+    },
+    computed: {
+      dog() {
+        return 'Dog' as const
+      },
+      pok: {
+        get() {
+          return 'Pok' as const
+        },
+        set() {},
+      },
+    },
+  })
+
+  defineComponent({
+    mixins: [testMixin1, testMixin2],
+
+    created() {
+      expectType<'Boris'>(this.cat)
+      expectType<'Fish'>(this.fish)
+      expectType<'Dog'>(this.dog)
+      expectType<() => 'Pizza'>(this.makePizza)
+      expectType<Boolean>(this.mixin2prop)
+    },
+  })
+})

@@ -2,6 +2,7 @@ import { ComponentPropsOptions } from './componentProps'
 import {
   MethodOptions,
   ComputedOptions,
+  MixinOptions,
   ComponentOptionsWithoutProps,
   ComponentOptionsWithArrayProps,
   ComponentOptionsWithProps,
@@ -19,7 +20,7 @@ export function defineComponent<
   D = Data,
   C extends ComputedOptions = {},
   M extends MethodOptions = {},
-  Mixin = {},
+  Mixin extends MixinOptions = [],
   Extends = {},
   Emits extends EmitsOptions = {}
 >(
@@ -46,7 +47,7 @@ export function defineComponent<
   D = Data,
   C extends ComputedOptions = {},
   M extends MethodOptions = {},
-  Mixin = {},
+  Mixin extends MixinOptions = [],
   Extends = {},
   Emits extends EmitsOptions = {},
   PropsOptions extends ComponentPropsOptions = ComponentPropsOptions
@@ -83,7 +84,7 @@ export function defineComponent<
   D = Data,
   C extends ComputedOptions = {},
   M extends MethodOptions = {},
-  Mixin = {},
+  Mixin extends MixinOptions = [],
   Extends = {},
   Emits extends EmitsOptions = {},
   PropsOptions extends ComponentPropsOptions = ComponentPropsOptions

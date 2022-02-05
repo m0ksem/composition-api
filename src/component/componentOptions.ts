@@ -22,6 +22,8 @@ export interface MethodOptions {
   [key: string]: Function
 }
 
+export type MixinOptions = Vue2ComponentOptions<Vue>[]
+
 export type SetupFunction<
   Props,
   RawBindings = {},
@@ -37,11 +39,11 @@ interface ComponentOptionsBase<
   D = Data,
   C extends ComputedOptions = {},
   M extends MethodOptions = {},
-  Mixin = {},
+  Mixin extends MixinOptions = [],
   Extends = {},
   Emits extends EmitsOptions = {}
 > extends Omit<
-    Vue2ComponentOptions<Vue, D, M, C, Props>,
+    Vue2ComponentOptions<Vue, D, M, C, Props, Mixin>,
     'data' | 'computed' | 'method' | 'setup' | 'props'
   > {
   // allow any custom options
@@ -51,6 +53,7 @@ interface ComponentOptionsBase<
   data?: (this: Props & Vue, vm: Props) => D
   computed?: C
   methods?: M
+  mixins?: Mixin
 }
 
 export type ExtractComputedReturns<T extends any> = {
@@ -67,11 +70,11 @@ export type ComponentOptionsWithProps<
   D = Data,
   C extends ComputedOptions = {},
   M extends MethodOptions = {},
-  Mixin = {},
+  Mixin extends MixinOptions = [],
   Extends = {},
   Emits extends EmitsOptions = {},
   Props = ExtractPropTypes<PropsOptions>
-> = ComponentOptionsBase<Props, D, C, M> & {
+> = ComponentOptionsBase<Props, D, C, M, Mixin> & {
   props?: PropsOptions
   emits?: Emits & ThisType<void>
   setup?: SetupFunction<Props, RawBindings, Emits>
@@ -85,7 +88,7 @@ export type ComponentOptionsWithArrayProps<
   D = Data,
   C extends ComputedOptions = {},
   M extends MethodOptions = {},
-  Mixin = {},
+  Mixin extends MixinOptions = [],
   Extends = {},
   Emits extends EmitsOptions = {},
   Props = Readonly<{ [key in PropNames]?: any }>
@@ -103,10 +106,10 @@ export type ComponentOptionsWithoutProps<
   D = Data,
   C extends ComputedOptions = {},
   M extends MethodOptions = {},
-  Mixin = {},
+  Mixin extends MixinOptions = [],
   Extends = {},
   Emits extends EmitsOptions = {}
-> = ComponentOptionsBase<Props, D, C, M> & {
+> = ComponentOptionsBase<Props, D, C, M, Mixin> & {
   props?: undefined
   emits?: Emits & ThisType<void>
   setup?: SetupFunction<Props, RawBindings, Emits>
